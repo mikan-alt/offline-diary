@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Offline Diary">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>Offline Diary</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f7fb;
+      --surface: #ffffff;
+      --surface2: #f1f5f9;
+      --text: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #111827;
+      --accentText: #ffffff;
+      --danger: #b91c1c;
+      --warning: #92400e;
+      --ok: #047857;
+      --shadow: 0 10px 30px rgba(15, 23, 42, .08);
+      --radius: 18px;
+      --safeTop: env(safe-area-inset-top, 0px);
+      --safeBottom: env(safe-area-inset-bottom, 0px);
+    }
+    [data-theme="dark"] {
+      --bg: #0b1020;
+      --surface: #121a2e;
+      --surface2: #172036;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --line: #263349;
+      --accent: #e5e7eb;
+      --accentText: #0f172a;
+      --danger: #f87171;
+      --warning: #fbbf24;
+      --ok: #34d399;
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      -webkit-text-size-adjust: 100%;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .app {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: calc(14px + var(--safeTop)) 14px calc(84px + var(--safeBottom));
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin: calc(-14px - var(--safeTop)) -14px 12px;
+      padding: calc(14px + var(--safeTop)) 14px 12px;
+      background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+    }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    h1 { font-size: 20px; line-height: 1.2; margin: 0; letter-spacing: .02em; }
+    .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .header-actions { display: flex; gap: 8px; flex-wrap: nowrap; }
+    .btn {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 13px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: none;
+      min-height: 42px;
+      white-space: nowrap;
+    }
+    .btn.primary { background: var(--accent); color: var(--accentText); border-color: var(--accent); font-weight: 700; }
+    .btn.danger { color: var(--danger); }
+    .btn.small { padding: 7px 10px; min-height: 34px; font-size: 13px; }
+    .btn.ghost { background: transparent; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 780px) { .grid { grid-template-columns: minmax(320px, 1fr) minmax(320px, 1.2fr); align-items: start; } }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card-body { padding: 14px; }
+    .section-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+    .section-title h2 { margin: 0; font-size: 16px; }
+    label { display: block; color: var(--muted); font-size: 12px; margin: 12px 0 6px; }
+    input[type="date"], input[type="text"], textarea, select, .search {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface2);
+      color: var(--text);
+      padding: 12px 13px;
+      outline: none;
+    }
+    textarea { min-height: 190px; resize: vertical; line-height: 1.7; }
+    input:focus, textarea:focus, select:focus { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+    .hint { color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .notice {
+      background: color-mix(in srgb, var(--warning) 11%, var(--surface));
+      border: 1px solid color-mix(in srgb, var(--warning) 33%, var(--line));
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 10px;
+    }
+    .notice strong { color: var(--warning); }
+    .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .toolbar .search { flex: 1; }
+    .list { display: flex; flex-direction: column; gap: 9px; max-height: none; }
+    @media (min-width: 780px) { .list { max-height: calc(100dvh - 210px); overflow: auto; padding-right: 4px; } }
+    .entry {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: var(--surface2);
+    }
+    .entry.active { outline: 3px solid color-mix(in srgb, var(--accent) 15%, transparent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+    .entry-head { display: flex; align-items: start; justify-content: space-between; gap: 8px; }
+    .entry-date { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .entry-title { font-weight: 800; margin: 1px 0 6px; overflow-wrap: anywhere; }
+    .entry-text { color: var(--muted); line-height: 1.55; font-size: 13px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; white-space: pre-wrap; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .chip { border-radius: 999px; border: 1px solid var(--line); padding: 3px 8px; font-size: 12px; color: var(--muted); background: color-mix(in srgb, var(--surface) 60%, transparent); }
+    .empty { text-align: center; color: var(--muted); padding: 38px 12px; border: 1px dashed var(--line); border-radius: 16px; background: var(--surface2); }
+    dialog {
+      width: min(92vw, 680px);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 0;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 25px 70px rgba(0,0,0,.35);
+    }
+    dialog::backdrop { background: rgba(0,0,0,.45); backdrop-filter: blur(3px); }
+    .dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding: 14px; }
+    .dialog-head h2 { margin: 0; font-size: 17px; }
+    .dialog-body { padding: 14px; }
+    .danger-zone { border: 1px solid color-mix(in srgb, var(--danger) 38%, var(--line)); border-radius: 16px; padding: 12px; margin-top: 12px; }
+    .stat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
+    .stat div { background: var(--surface2); border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
+    .stat b { display: block; font-size: 18px; }
+    .stat span { color: var(--muted); font-size: 11px; }
+    .footerbar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 30;
+      padding: 10px 14px calc(10px + var(--safeBottom));
+      background: color-mix(in srgb, var(--bg) 90%, transparent);
+      border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+      backdrop-filter: blur(16px);
+    }
+    .footerbar-inner { max-width: 920px; margin: 0 auto; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+    .status { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .hidden { display: none !important; }
+    .sr-only { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    @supports not (color: color-mix(in srgb, white, black)) {
+      header, .footerbar { background: var(--bg); }
+      .notice { background: var(--surface2); }
+      .entry { background: var(--surface2); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header>
+      <div class="topbar">
+        <div>
+          <h1>Offline Diary</h1>
+          <div class="sub">端末内保存 / JSONバックアップ対応</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn small" id="themeBtn" type="button">表示</button>
+          <button class="btn small" id="dataBtn" type="button">データ</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card" aria-labelledby="editor-title">
+        <div class="card-body">
+          <div class="section-title">
+            <h2 id="editor-title">日記を書く</h2>
+            <button class="btn small ghost" id="newBtn" type="button">新規</button>
+          </div>
+          <input type="hidden" id="entryId">
+          <div class="row">
+            <div>
+              <label for="dateInput">日付</label>
+              <input id="dateInput" type="date">
+            </div>
+            <div>
+              <label for="moodInput">気分</label>
+              <select id="moodInput">
+                <option value="">未設定</option>
+                <option>よい</option>
+                <option>普通</option>
+                <option>しんどい</option>
+                <option>怒り</option>
+                <option>不安</option>
+                <option>発見</option>
+              </select>
+            </div>
+          </div>
+          <label for="titleInput">タイトル</label>
+          <input id="titleInput" type="text" placeholder="例：仕事のやる気が出ない">
+          <label for="bodyInput">本文</label>
+          <textarea id="bodyInput" placeholder="今日あったこと、考えたことを書く。"></textarea>
+          <label for="tagsInput">タグ（カンマ区切り）</label>
+          <input id="tagsInput" type="text" placeholder="例：仕事, 家族, 仏教">
+          <div class="actions">
+            <button class="btn primary" id="saveBtn" type="button">保存</button>
+            <button class="btn" id="duplicateBtn" type="button">複製</button>
+            <button class="btn danger" id="deleteBtn" type="button">削除</button>
+          </div>
+          <div class="notice"><strong>重要：</strong>日記データはこのブラウザ内に保存されます。週1回くらい「データ」→「JSONを書き出す」でバックアップしてください。</div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="list-title">
+        <div class="card-body">
+          <div class="section-title">
+            <h2 id="list-title">日記一覧</h2>
+            <span class="hint" id="countLabel">0件</span>
+          </div>
+          <div class="toolbar">
+            <label for="searchInput" class="sr-only">検索</label>
+            <input class="search" id="searchInput" type="search" placeholder="本文・タイトル・タグを検索">
+            <button class="btn small" id="clearSearchBtn" type="button">解除</button>
+          </div>
+          <div class="list" id="entryList"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="footerbar">
+    <div class="footerbar-inner">
+      <div class="status" id="statusText">起動中...</div>
+      <button class="btn small primary" id="quickBackupBtn" type="button">バックアップ</button>
+    </div>
+  </div>
+
+  <dialog id="dataDialog">
+    <div class="dialog-head">
+      <h2>データ管理</h2>
+      <button class="btn small" id="closeDataBtn" type="button">閉じる</button>
+    </div>
+    <div class="dialog-body">
+      <p class="hint">完全オフライン運用では、JSONバックアップが命綱です。書き出したファイルは「このiPhone内」や外部ストレージに保管できます。</p>
+      <div class="stat">
+        <div><b id="statCount">0</b><span>件数</span></div>
+        <div><b id="statChars">0</b><span>本文文字数</span></div>
+        <div><b id="statLast">-</b><span>最終更新</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="exportBtn" type="button">JSONを書き出す</button>
+        <label class="btn" for="importInput">JSONを読み込む</label>
+        <input class="hidden" id="importInput" type="file" accept="application/json,.json">
+      </div>
+      <p class="hint">読み込みは既存データに統合します。同じIDの日記は、更新日時が新しい方を残します。</p>
+      <div class="danger-zone">
+        <strong style="color:var(--danger)">危険操作</strong>
+        <p class="hint">全削除の前に、必ずJSONを書き出してください。</p>
+        <button class="btn danger" id="wipeBtn" type="button">全データ削除</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const DB_NAME = 'offline_diary_db_v1';
+    const STORE = 'entries';
+    const SETTINGS_KEY = 'offline_diary_settings_v1';
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      app: $('app'), entryId: $('entryId'), date: $('dateInput'), mood: $('moodInput'),
+      title: $('titleInput'), body: $('bodyInput'), tags: $('tagsInput'), save: $('saveBtn'),
+      duplicate: $('duplicateBtn'), del: $('deleteBtn'), newer: $('newBtn'), list: $('entryList'),
+      search: $('searchInput'), clearSearch: $('clearSearchBtn'), countLabel: $('countLabel'),
+      status: $('statusText'), dataBtn: $('dataBtn'), dataDialog: $('dataDialog'),
+      closeData: $('closeDataBtn'), exportBtn: $('exportBtn'), importInput: $('importInput'),
+      quickBackup: $('quickBackupBtn'), wipe: $('wipeBtn'), themeBtn: $('themeBtn'),
+      statCount: $('statCount'), statChars: $('statChars'), statLast: $('statLast')
+    };
+
+    let db = null;
+    let entries = [];
+    let activeId = null;
+    let saveTimer = null;
+
+    const today = () => new Date().toISOString().slice(0, 10);
+    const nowISO = () => new Date().toISOString();
+    const uid = () => 'd_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+    const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    const normalizeTags = (s) => String(s || '').split(/[、,]/).map(x => x.trim()).filter(Boolean).slice(0, 20);
+    const compactDate = (iso) => {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return '-';
+      return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+    };
+    const status = (msg) => { els.status.textContent = msg; };
+
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) return reject(new Error('IndexedDBが使えません'));
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const database = req.result;
+          if (!database.objectStoreNames.contains(STORE)) {
+            const store = database.createObjectStore(STORE, { keyPath: 'id' });
+            store.createIndex('date', 'date', { unique: false });
+            store.createIndex('updatedAt', 'updatedAt', { unique: false });
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error || new Error('DBを開けません'));
+      });
+    }
+
+    function tx(mode = 'readonly') {
+      return db.transaction(STORE, mode).objectStore(STORE);
+    }
+    function getAll() {
+      return new Promise((resolve, reject) => {
+        const req = tx().getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    function put(entry) {
+      return new Promise((resolve, reject) => {
+        const req = tx('readwrite').put(entry);
+        req.onsuccess = () => resolve(entry);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    function remove(id) {
+      return new Promise((resolve, reject) => {
+        const req = tx('readwrite').delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+    function clearStore() {
+      return new Promise((resolve, reject) => {
+        const req = tx('readwrite').clear();
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function readSettings() {
+      try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); }
+      catch { return {}; }
+    }
+    function writeSettings(settings) {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    }
+    function applyTheme(theme) {
+      const actual = theme || 'auto';
+      if (actual === 'dark') document.documentElement.dataset.theme = 'dark';
+      else if (actual === 'light') document.documentElement.dataset.theme = 'light';
+      else document.documentElement.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      els.themeBtn.textContent = actual === 'dark' ? '夜' : actual === 'light' ? '昼' : '自動';
+    }
+    function cycleTheme() {
+      const s = readSettings();
+      const next = s.theme === 'auto' || !s.theme ? 'light' : s.theme === 'light' ? 'dark' : 'auto';
+      s.theme = next;
+      writeSettings(s);
+      applyTheme(next);
+    }
+
+    async function loadEntries() {
+      entries = (await getAll()).sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+      renderList();
+      renderStats();
+    }
+
+    function currentFromForm({ forceNew = false } = {}) {
+      const existing = entries.find(e => e.id === activeId);
+      const timestamp = nowISO();
+      return {
+        id: forceNew ? uid() : (els.entryId.value || uid()),
+        date: els.date.value || today(),
+        mood: els.mood.value || '',
+        title: els.title.value.trim(),
+        body: els.body.value.trim(),
+        tags: normalizeTags(els.tags.value),
+        createdAt: forceNew ? timestamp : (existing?.createdAt || timestamp),
+        updatedAt: timestamp,
+        appVersion: 1
+      };
+    }
+
+    async function saveEntry({ silent = false, forceNew = false } = {}) {
+      const entry = currentFromForm({ forceNew });
+      if (!entry.title && !entry.body && !entry.tags.length && !entry.mood) {
+        if (!silent) status('空の日記は保存していません');
+        return;
+      }
+      await put(entry);
+      activeId = entry.id;
+      els.entryId.value = entry.id;
+      await loadEntries();
+      if (!silent) status(`保存しました：${entry.date}`);
+      return entry;
+    }
+
+    function setForm(entry = null) {
+      const e = entry || { id: '', date: today(), mood: '', title: '', body: '', tags: [] };
+      activeId = e.id || null;
+      els.entryId.value = e.id || '';
+      els.date.value = e.date || today();
+      els.mood.value = e.mood || '';
+      els.title.value = e.title || '';
+      els.body.value = e.body || '';
+      els.tags.value = (e.tags || []).join(', ');
+      renderList();
+      status(e.id ? `編集中：${e.date}` : '新規日記');
+      setTimeout(() => els.title.focus(), 50);
+    }
+
+    function filteredEntries() {
+      const q = els.search.value.trim().toLowerCase();
+      if (!q) return entries;
+      return entries.filter(e => [e.date, e.title, e.body, e.mood, ...(e.tags || [])].join('\n').toLowerCase().includes(q));
+    }
+
+    function renderList() {
+      const items = filteredEntries();
+      els.countLabel.textContent = `${items.length}件 / 全${entries.length}件`;
+      if (!items.length) {
+        els.list.innerHTML = '<div class="empty">まだ日記がありません。左側から保存してください。</div>';
+        return;
+      }
+      els.list.innerHTML = items.map(e => {
+        const title = e.title || '(無題)';
+        const tags = (e.tags || []).map(t => `<span class="chip">#${esc(t)}</span>`).join('');
+        const mood = e.mood ? `<span class="chip">${esc(e.mood)}</span>` : '';
+        return `<article class="entry ${e.id === activeId ? 'active' : ''}" data-id="${esc(e.id)}">
+          <div class="entry-head">
+            <div style="min-width:0">
+              <div class="entry-title">${esc(title)}</div>
+              <div class="entry-text">${esc(e.body || '')}</div>
+              <div class="chips">${mood}${tags}</div>
+            </div>
+            <div class="entry-date">${esc(e.date || '')}</div>
+          </div>
+        </article>`;
+      }).join('');
+      els.list.querySelectorAll('.entry').forEach(el => {
+        el.addEventListener('click', () => {
+          const e = entries.find(x => x.id === el.dataset.id);
+          if (e) setForm(e);
+        });
+      });
+    }
+
+    function renderStats() {
+      const chars = entries.reduce((n, e) => n + String(e.body || '').length, 0);
+      const last = entries.slice().sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''))[0]?.updatedAt;
+      els.statCount.textContent = String(entries.length);
+      els.statChars.textContent = String(chars);
+      els.statLast.textContent = compactDate(last);
+    }
+
+    function exportJSON() {
+      const payload = {
+        app: 'offline-diary',
+        version: 1,
+        exportedAt: nowISO(),
+        count: entries.length,
+        entries: entries.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16);
+      const filename = `offline-diary-backup-${stamp}.json`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 500);
+      status(`バックアップを書き出しました：${filename}`);
+    }
+
+    async function importJSON(file) {
+      if (!file) return;
+      const text = await file.text();
+      let payload;
+      try { payload = JSON.parse(text); }
+      catch { alert('JSONとして読み込めませんでした。'); return; }
+      const incoming = Array.isArray(payload) ? payload : payload.entries;
+      if (!Array.isArray(incoming)) { alert('日記データが見つかりません。'); return; }
+      if (!confirm(`${incoming.length}件のデータを読み込み、既存データに統合します。よろしいですか？`)) return;
+      const map = new Map(entries.map(e => [e.id, e]));
+      let added = 0, updated = 0, skipped = 0;
+      for (const raw of incoming) {
+        if (!raw || typeof raw !== 'object') { skipped++; continue; }
+        const id = String(raw.id || uid());
+        const entry = {
+          id,
+          date: String(raw.date || today()).slice(0, 10),
+          mood: String(raw.mood || ''),
+          title: String(raw.title || ''),
+          body: String(raw.body || ''),
+          tags: Array.isArray(raw.tags) ? raw.tags.map(String).slice(0, 20) : normalizeTags(raw.tags || ''),
+          createdAt: String(raw.createdAt || nowISO()),
+          updatedAt: String(raw.updatedAt || nowISO()),
+          appVersion: 1
+        };
+        const old = map.get(id);
+        if (!old) { await put(entry); added++; }
+        else if ((entry.updatedAt || '') > (old.updatedAt || '')) { await put(entry); updated++; }
+        else skipped++;
+      }
+      await loadEntries();
+      renderStats();
+      status(`読み込み完了：追加${added}件、更新${updated}件、スキップ${skipped}件`);
+      els.importInput.value = '';
+    }
+
+    async function deleteActive() {
+      if (!activeId) { status('削除対象がありません'); return; }
+      const e = entries.find(x => x.id === activeId);
+      const label = e?.title || e?.date || activeId;
+      if (!confirm(`「${label}」を削除します。よろしいですか？`)) return;
+      await remove(activeId);
+      await loadEntries();
+      setForm(null);
+      status('削除しました');
+    }
+
+    async function wipeAll() {
+      const word = prompt('全データを削除します。実行するには「削除」と入力してください。');
+      if (word !== '削除') return;
+      await clearStore();
+      await loadEntries();
+      setForm(null);
+      status('全データを削除しました');
+    }
+
+    function scheduleDraftSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        try { await saveEntry({ silent: true }); status('自動保存しました'); }
+        catch (err) { console.error(err); status('自動保存に失敗しました'); }
+      }, 2000);
+    }
+
+    function wire() {
+      els.save.addEventListener('click', () => saveEntry().catch(err => { console.error(err); alert('保存に失敗しました: ' + err.message); }));
+      els.duplicate.addEventListener('click', () => saveEntry({ forceNew: true }).then(e => { if (e) status('複製して保存しました'); }).catch(console.error));
+      els.del.addEventListener('click', () => deleteActive().catch(console.error));
+      els.newer.addEventListener('click', () => setForm(null));
+      els.search.addEventListener('input', renderList);
+      els.clearSearch.addEventListener('click', () => { els.search.value = ''; renderList(); });
+      els.dataBtn.addEventListener('click', () => { renderStats(); els.dataDialog.showModal(); });
+      els.closeData.addEventListener('click', () => els.dataDialog.close());
+      els.exportBtn.addEventListener('click', exportJSON);
+      els.quickBackup.addEventListener('click', exportJSON);
+      els.importInput.addEventListener('change', () => importJSON(els.importInput.files[0]).catch(err => { console.error(err); alert('読み込みに失敗しました: ' + err.message); }));
+      els.wipe.addEventListener('click', () => wipeAll().catch(console.error));
+      els.themeBtn.addEventListener('click', cycleTheme);
+      [els.date, els.mood, els.title, els.body, els.tags].forEach(el => el.addEventListener('input', scheduleDraftSave));
+      window.addEventListener('beforeunload', () => { if (saveTimer) clearTimeout(saveTimer); });
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Service worker registration failed', err));
+      }
+    }
+
+    async function init() {
+      const settings = readSettings();
+      applyTheme(settings.theme || 'auto');
+      wire();
+      els.date.value = today();
+      try {
+        db = await openDB();
+        await loadEntries();
+        setForm(entries[0] || null);
+        status(`準備完了：${entries.length}件`);
+      } catch (err) {
+        console.error(err);
+        status('IndexedDBを開けませんでした');
+        alert('この環境では保存DBを開けませんでした。Safariの通常/ホーム画面、またはHTTPS上で開いてください。');
+      }
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>
