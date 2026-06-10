@@ -595,7 +595,7 @@
       [els.date, els.mood, els.title, els.body, els.tags].forEach(el => el.addEventListener('input', scheduleDraftSave));
       window.addEventListener('beforeunload', () => { if (saveTimer) clearTimeout(saveTimer); });
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Service worker registration failed', err));
+        navigator.serviceWorker.register('./sw.js?v=3').catch(err => console.warn('Service worker registration failed', err));
       }
     }
 

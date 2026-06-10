@@ -1,4 +1,5 @@
-const CACHE_NAME = 'offline-diary-app-v2';
+const CACHE_NAME = 'offline-diary-app-v3';
+
 const ASSETS = [
   './',
   './index.html',
@@ -8,24 +9,63 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.map((key) => key === CACHE_NAME ? null : caches.delete(key))))
+    caches.keys()
+      .then((keys) =>
+        Promise.all(
+          keys.map((key) => key === CACHE_NAME ? null : caches.delete(key))
+        )
+      )
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const request = event.request;
+  const accept = request.headers.get('accept') || '';
+  const isHTML =
+    request.mode === 'navigate' ||
+    accept.includes('text/html');
+
+  // HTMLはネットワーク優先。更新を反映しやすくする。
+  if (isHTML) {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put('./index.html', copy);
+          });
+          return response;
+        })
+        .catch(() =>
+          caches.match('./index.html').then((cached) => cached || caches.match('./'))
+        )
+    );
+    return;
+  }
+
+  // 画像・manifestなどはキャッシュ優先。
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-      return response;
-    }).catch(() => caches.match('./index.html')))
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+
+      return fetch(request).then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(request, copy);
+        });
+        return response;
+      });
+    })
   );
 });
