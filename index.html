@@ -111,7 +111,10 @@
     }
     textarea { min-height: 190px; resize: vertical; line-height: 1.7; }
     input:focus, textarea:focus, select:focus { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .row > * { min-width: 0; }
+    input, textarea, select { min-width: 0; }
+    @media (min-width: 520px) { .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
     .hint { color: var(--muted); font-size: 12px; line-height: 1.6; }
     .notice {
