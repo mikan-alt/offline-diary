@@ -43,83 +43,210 @@
       --ok: #34d399;
       --shadow: 0 12px 30px rgba(0,0,0,.35);
     }
+
     * { box-sizing: border-box; }
-    body {
+    html, body {
+      width: 100%;
+      max-width: 100%;
       margin: 0;
+      overflow-x: hidden;
+    }
+    body {
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", "YuGothic", "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100dvh;
       -webkit-text-size-adjust: 100%;
     }
-    button, input, textarea, select { font: inherit; }
+    button, input, textarea, select {
+      font: inherit;
+      max-width: 100%;
+    }
     button { cursor: pointer; }
+
     .app {
+      width: 100%;
       max-width: 920px;
       margin: 0 auto;
-      padding: calc(14px + var(--safeTop)) 14px calc(84px + var(--safeBottom));
+      padding: calc(12px + var(--safeTop)) 12px calc(90px + var(--safeBottom));
+      overflow-x: hidden;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      margin: calc(-14px - var(--safeTop)) -14px 12px;
-      padding: calc(14px + var(--safeTop)) 14px 12px;
-      background: color-mix(in srgb, var(--bg) 88%, transparent);
-      backdrop-filter: blur(16px);
-      border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+
+    /* v7: sticky/negative marginを廃止。iPhone/ChatGPTプレビューでの上部崩れを避ける */
+    .app-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      margin: 0 0 12px;
+      padding: 0;
+      width: 100%;
+      min-width: 0;
     }
-    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    h1 { font-size: 20px; line-height: 1.2; margin: 0; letter-spacing: .02em; }
-    .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
-    .header-actions { display: flex; gap: 8px; flex-wrap: nowrap; }
+    .title-wrap { min-width: 0; }
+    h1 {
+      font-size: clamp(22px, 6vw, 30px);
+      line-height: 1.12;
+      margin: 0;
+      letter-spacing: .01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: clamp(11px, 3.2vw, 13px);
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-actions {
+      display: flex;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+
     .btn {
       border: 1px solid var(--line);
       border-radius: 999px;
-      padding: 10px 13px;
+      padding: 9px 12px;
       background: var(--surface);
       color: var(--text);
-      box-shadow: none;
-      min-height: 42px;
+      min-height: 38px;
       white-space: nowrap;
+      box-shadow: none;
+      line-height: 1.1;
     }
-    .btn.primary { background: var(--accent); color: var(--accentText); border-color: var(--accent); font-weight: 700; }
+    .btn.primary {
+      background: var(--accent);
+      color: var(--accentText);
+      border-color: var(--accent);
+      font-weight: 700;
+    }
     .btn.danger { color: var(--danger); }
-    .btn.small { padding: 7px 10px; min-height: 34px; font-size: 13px; }
+    .btn.small {
+      padding: 7px 10px;
+      min-height: 34px;
+      font-size: 13px;
+    }
     .btn.ghost { background: transparent; }
-    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 780px) { .grid { grid-template-columns: minmax(320px, 1fr) minmax(320px, 1.2fr); align-items: start; } }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      width: 100%;
+      min-width: 0;
+    }
+    @media (min-width: 780px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        align-items: start;
+      }
+    }
+
     .card {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
       background: var(--surface);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
-    .card-body { padding: 14px; }
-    .section-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-    .section-title h2 { margin: 0; font-size: 16px; }
-    label { display: block; color: var(--muted); font-size: 12px; margin: 12px 0 6px; }
-    input[type="date"], input[type="text"], textarea, select, .search {
+    .card-body {
       width: 100%;
+      min-width: 0;
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+      min-width: 0;
+    }
+    .section-title h2 {
+      margin: 0;
+      font-size: clamp(18px, 5vw, 22px);
+      line-height: 1.2;
+      min-width: 0;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin: 12px 0 6px;
+    }
+
+    /* v7: 日付・気分は常に1列。iOSのtype=dateを使わず、はみ出しを防ぐ */
+    .field-stack {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    input[type="text"],
+    input[type="search"],
+    textarea,
+    select,
+    .date-text-input {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
       border: 1px solid var(--line);
       border-radius: 14px;
       background: var(--surface2);
       color: var(--text);
       padding: 12px 13px;
       outline: none;
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+      line-height: 1.3;
     }
-    textarea { min-height: 190px; resize: vertical; line-height: 1.7; }
-    input:focus, textarea:focus, select:focus { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent); }
-    .row { display: grid; grid-template-columns: 1fr; gap: 10px; }
-    .row > * { min-width: 0; }
-    input, textarea, select { min-width: 0; }
-    @media (min-width: 520px) { .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
-    .hint { color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .date-text-input {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .02em;
+    }
+    textarea {
+      min-height: 190px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(17,24,39,.12);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      align-items: center;
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
     .notice {
-      background: color-mix(in srgb, var(--warning) 11%, var(--surface));
-      border: 1px solid color-mix(in srgb, var(--warning) 33%, var(--line));
+      background: var(--surface2);
+      border: 1px solid var(--line);
       color: var(--text);
       border-radius: 14px;
       padding: 10px 12px;
@@ -128,24 +255,98 @@
       margin-top: 10px;
     }
     .notice strong { color: var(--warning); }
-    .toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-    .toolbar .search { flex: 1; }
-    .list { display: flex; flex-direction: column; gap: 9px; max-height: none; }
-    @media (min-width: 780px) { .list { max-height: calc(100dvh - 210px); overflow: auto; padding-right: 4px; } }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+      min-width: 0;
+    }
+    .toolbar .search {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      max-height: none;
+    }
+    @media (min-width: 780px) {
+      .list {
+        max-height: calc(100dvh - 210px);
+        overflow: auto;
+        padding-right: 4px;
+      }
+    }
+
     .entry {
       border: 1px solid var(--line);
       border-radius: 16px;
       padding: 12px;
       background: var(--surface2);
+      min-width: 0;
     }
-    .entry.active { outline: 3px solid color-mix(in srgb, var(--accent) 15%, transparent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
-    .entry-head { display: flex; align-items: start; justify-content: space-between; gap: 8px; }
-    .entry-date { color: var(--muted); font-size: 12px; white-space: nowrap; }
-    .entry-title { font-weight: 800; margin: 1px 0 6px; overflow-wrap: anywhere; }
-    .entry-text { color: var(--muted); line-height: 1.55; font-size: 13px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; white-space: pre-wrap; }
-    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-    .chip { border-radius: 999px; border: 1px solid var(--line); padding: 3px 8px; font-size: 12px; color: var(--muted); background: color-mix(in srgb, var(--surface) 60%, transparent); }
-    .empty { text-align: center; color: var(--muted); padding: 38px 12px; border: 1px dashed var(--line); border-radius: 16px; background: var(--surface2); }
+    .entry.active {
+      outline: 3px solid rgba(17, 24, 39, .12);
+      border-color: var(--accent);
+    }
+    [data-theme="dark"] .entry.active {
+      outline-color: rgba(229, 231, 235, .16);
+    }
+    .entry-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }
+    .entry-date {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .entry-title {
+      font-weight: 800;
+      margin: 1px 0 6px;
+      overflow-wrap: anywhere;
+    }
+    .entry-text {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 13px;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      white-space: pre-wrap;
+    }
+    .chips {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .chip {
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 3px 8px;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface);
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 38px 12px;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      background: var(--surface2);
+    }
+
     dialog {
       width: min(92vw, 680px);
       border: 1px solid var(--line);
@@ -155,48 +356,106 @@
       color: var(--text);
       box-shadow: 0 25px 70px rgba(0,0,0,.35);
     }
-    dialog::backdrop { background: rgba(0,0,0,.45); backdrop-filter: blur(3px); }
-    .dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding: 14px; }
-    .dialog-head h2 { margin: 0; font-size: 17px; }
+    dialog::backdrop {
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(3px);
+    }
+    .dialog-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+      padding: 14px;
+    }
+    .dialog-head h2 {
+      margin: 0;
+      font-size: 17px;
+    }
     .dialog-body { padding: 14px; }
-    .danger-zone { border: 1px solid color-mix(in srgb, var(--danger) 38%, var(--line)); border-radius: 16px; padding: 12px; margin-top: 12px; }
-    .stat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; }
-    .stat div { background: var(--surface2); border: 1px solid var(--line); border-radius: 14px; padding: 10px; }
-    .stat b { display: block; font-size: 18px; }
-    .stat span { color: var(--muted); font-size: 11px; }
+    .danger-zone {
+      border: 1px solid var(--danger);
+      border-radius: 16px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    .stat {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .stat div {
+      background: var(--surface2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      min-width: 0;
+    }
+    .stat b {
+      display: block;
+      font-size: 18px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .stat span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
     .footerbar {
       position: fixed;
-      left: 0; right: 0; bottom: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       z-index: 30;
-      padding: 10px 14px calc(10px + var(--safeBottom));
-      background: color-mix(in srgb, var(--bg) 90%, transparent);
-      border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+      padding: 10px 12px calc(10px + var(--safeBottom));
+      background: rgba(247,247,251,.92);
+      border-top: 1px solid var(--line);
       backdrop-filter: blur(16px);
     }
-    .footerbar-inner { max-width: 920px; margin: 0 auto; display: flex; gap: 8px; align-items: center; justify-content: space-between; }
-    .status { color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    [data-theme="dark"] .footerbar { background: rgba(11,16,32,.92); }
+    .footerbar-inner {
+      max-width: 920px;
+      margin: 0 auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 0;
+    }
+    .status {
+      color: var(--muted);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
     .hidden { display: none !important; }
-    .sr-only { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-    @supports not (color: color-mix(in srgb, white, black)) {
-      header, .footerbar { background: var(--bg); }
-      .notice { background: var(--surface2); }
-      .entry { background: var(--surface2); }
+    .sr-only {
+      position:absolute;
+      left:-10000px;
+      width:1px;
+      height:1px;
+      overflow:hidden;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
   </style>
 </head>
 <body>
   <div class="app" id="app">
-    <header>
-      <div class="topbar">
-        <div>
-          <h1>Offline Diary</h1>
-          <div class="sub">端末内保存 / JSONバックアップ対応</div>
-        </div>
-        <div class="header-actions">
-          <button class="btn small" id="themeBtn" type="button">表示</button>
-          <button class="btn small" id="dataBtn" type="button">データ</button>
-        </div>
+    <header class="app-header">
+      <div class="title-wrap">
+        <h1>Offline Diary</h1>
+        <div class="sub">端末内保存 / JSONバックアップ対応 v7</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn small" id="themeBtn" type="button">表示</button>
+        <button class="btn small" id="dataBtn" type="button">データ</button>
       </div>
     </header>
 
@@ -208,10 +467,11 @@
             <button class="btn small ghost" id="newBtn" type="button">新規</button>
           </div>
           <input type="hidden" id="entryId">
-          <div class="row">
+
+          <div class="field-stack">
             <div>
               <label for="dateInput">日付</label>
-              <input id="dateInput" type="date">
+              <input id="dateInput" class="date-text-input" type="text" inputmode="numeric" autocomplete="off" placeholder="2026-06-10">
             </div>
             <div>
               <label for="moodInput">気分</label>
@@ -226,17 +486,22 @@
               </select>
             </div>
           </div>
+
           <label for="titleInput">タイトル</label>
           <input id="titleInput" type="text" placeholder="例：仕事のやる気が出ない">
+
           <label for="bodyInput">本文</label>
           <textarea id="bodyInput" placeholder="今日あったこと、考えたことを書く。"></textarea>
+
           <label for="tagsInput">タグ（カンマ区切り）</label>
           <input id="tagsInput" type="text" placeholder="例：仕事, 家族, 仏教">
+
           <div class="actions">
             <button class="btn primary" id="saveBtn" type="button">保存</button>
             <button class="btn" id="duplicateBtn" type="button">複製</button>
             <button class="btn danger" id="deleteBtn" type="button">削除</button>
           </div>
+
           <div class="notice"><strong>重要：</strong>日記データはこのブラウザ内に保存されます。週1回くらい「データ」→「JSONを書き出す」でバックアップしてください。</div>
         </div>
       </section>
@@ -320,10 +585,25 @@
     const uid = () => 'd_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
     const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
     const normalizeTags = (s) => String(s || '').split(/[、,]/).map(x => x.trim()).filter(Boolean).slice(0, 20);
+    const normalizeDate = (s) => {
+      const raw = String(s || '').trim();
+      if (!raw) return today();
+      const m = raw.match(/^(\d{4})[\/\-.年](\d{1,2})[\/\-.月](\d{1,2})日?$/);
+      if (m) {
+        const y = m[1];
+        const mo = String(Number(m[2])).padStart(2, '0');
+        const d = String(Number(m[3])).padStart(2, '0');
+        return `${y}-${mo}-${d}`;
+      }
+      const m2 = raw.match(/^(\d{4})(\d{2})(\d{2})$/);
+      if (m2) return `${m2[1]}-${m2[2]}-${m2[3]}`;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      return raw;
+    };
     const compactDate = (iso) => {
       if (!iso) return '-';
       const d = new Date(iso);
-      if (Number.isNaN(d.getTime())) return '-';
+      if (Number.isNaN(d.getTime())) return String(iso).slice(0, 10).replaceAll('-', '/');
       return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
     };
     const status = (msg) => { els.status.textContent = msg; };
@@ -408,16 +688,18 @@
     function currentFromForm({ forceNew = false } = {}) {
       const existing = entries.find(e => e.id === activeId);
       const timestamp = nowISO();
+      const dateValue = normalizeDate(els.date.value);
+      els.date.value = dateValue;
       return {
         id: forceNew ? uid() : (els.entryId.value || uid()),
-        date: els.date.value || today(),
+        date: dateValue || today(),
         mood: els.mood.value || '',
         title: els.title.value.trim(),
         body: els.body.value.trim(),
         tags: normalizeTags(els.tags.value),
         createdAt: forceNew ? timestamp : (existing?.createdAt || timestamp),
         updatedAt: timestamp,
-        appVersion: 1
+        appVersion: 7
       };
     }
 
@@ -496,7 +778,7 @@
     function exportJSON() {
       const payload = {
         app: 'offline-diary',
-        version: 1,
+        version: 7,
         exportedAt: nowISO(),
         count: entries.length,
         entries: entries.slice().sort((a, b) => (a.date || '').localeCompare(b.date || ''))
@@ -530,14 +812,14 @@
         const id = String(raw.id || uid());
         const entry = {
           id,
-          date: String(raw.date || today()).slice(0, 10),
+          date: normalizeDate(raw.date || today()),
           mood: String(raw.mood || ''),
           title: String(raw.title || ''),
           body: String(raw.body || ''),
           tags: Array.isArray(raw.tags) ? raw.tags.map(String).slice(0, 20) : normalizeTags(raw.tags || ''),
           createdAt: String(raw.createdAt || nowISO()),
           updatedAt: String(raw.updatedAt || nowISO()),
-          appVersion: 1
+          appVersion: Number(raw.appVersion || 7)
         };
         const old = map.get(id);
         if (!old) { await put(entry); added++; }
@@ -592,10 +874,11 @@
       els.importInput.addEventListener('change', () => importJSON(els.importInput.files[0]).catch(err => { console.error(err); alert('読み込みに失敗しました: ' + err.message); }));
       els.wipe.addEventListener('click', () => wipeAll().catch(console.error));
       els.themeBtn.addEventListener('click', cycleTheme);
+      els.date.addEventListener('blur', () => { els.date.value = normalizeDate(els.date.value); });
       [els.date, els.mood, els.title, els.body, els.tags].forEach(el => el.addEventListener('input', scheduleDraftSave));
       window.addEventListener('beforeunload', () => { if (saveTimer) clearTimeout(saveTimer); });
       if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-        navigator.serviceWorker.register('./sw.js?v=3').catch(err => console.warn('Service worker registration failed', err));
+        navigator.serviceWorker.register('./sw.js?v=7').catch(err => console.warn('Service worker registration failed', err));
       }
     }
 

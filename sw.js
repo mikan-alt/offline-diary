@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-diary-app-v3';
+const CACHE_NAME = 'offline-diary-app-v7';
 
 const ASSETS = [
   './',
